@@ -34,7 +34,7 @@ class Model
 		void setZRotation(float num);
 		void setRotation(float x, float y, float z);
 		void setRotation(XMVECTOR rotation);
-		void setScale(float scale);
+		void setScale(float scaleX, float scaleY, float scaleZ);
 		float getXPosition();
 		float getYPosition();
 		float getZPosition();
@@ -43,7 +43,7 @@ class Model
 		float getYRotation();
 		float getZRotation();
 		XMVECTOR getRotation();
-		float getScale();
+		xyz getScale();
 
 		void incXPosition(float num);
 		void incYPosition(float num);
@@ -88,7 +88,7 @@ class Model
 	
 		float					m_x, m_y, m_z, directionX, directionZ;
 		float					m_xAngle, m_yAngle, m_zAngle;
-		float					m_scale;
+		float					m_scaleX, m_scaleY, m_scaleZ;
 
 		ID3D11ShaderResourceView*	m_pTexture;
 		ID3D11SamplerState*			m_pSampler;

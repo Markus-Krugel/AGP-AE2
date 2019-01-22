@@ -1,14 +1,23 @@
 #include "Controls.h"
 
+Controls::Controls()
+{
+	g_keyboard_device = NULL;
+	g_direct_input = NULL;
+}
+
 Controls::Controls(HINSTANCE hinstance, HWND hWnd)
 {
+	g_keyboard_device = NULL;
+	g_direct_input = NULL;
+
 	this->hinstance = hinstance;
 	this->hWnd = hWnd;
 }
 
 Controls::~Controls()
 {
-	if (g_keyboard_device)
+	if (g_keyboard_device && g_keyboard_device != NULL)
 	{
 		g_keyboard_device->Unacquire();
 		g_keyboard_device->Release();

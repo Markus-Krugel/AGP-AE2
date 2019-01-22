@@ -1,5 +1,9 @@
 #include "camera.h";
 
+Camera::Camera()
+{
+}
+
 Camera::Camera(float x, float y, float z, float camera_rotation)
 {
 	m_velocityY = 0;
@@ -44,7 +48,9 @@ XMMATRIX Camera::GetViewMatrix()
 	m_lookat = XMVectorSet(m_x + m_dx, m_y + m_dy, m_z + m_dz, 0);
 	m_up = XMVectorSet(0, 1, 0, 0);
 
-	return XMMatrixLookAtLH(m_position, m_lookat, m_up);
+	XMMATRIX result = XMMatrixLookAtLH(m_position, m_lookat, m_up);
+
+	return result;
 }
 
 void Camera::Strafe(float distance)

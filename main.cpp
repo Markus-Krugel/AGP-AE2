@@ -18,6 +18,7 @@
 #include "Enemy.h"
 #include "GameTimer.h"
 #include "Controls.h"
+#include "Level.h"
 #include <iostream>
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +54,7 @@ XMMATRIX projection, world, view;
 
 ID3D11DepthStencilView* g_pZBuffer;
 
-Camera* camera;
+Camera camera;
 
 ID3D11ShaderResourceView* g_pTexture0;
 ID3D11SamplerState* g_pSampler0;
@@ -68,31 +69,16 @@ XMVECTOR g_directional_light_rotation;
 XMVECTOR g_point_light_colour;
 XMVECTOR g_point_light_position;
 
-vector<Model> objects;
-Player* player;
-Enemy* enemy;
+Level level;
 
-Skybox* skybox;
+Player player;
+Enemy enemy;
 
-GameTimer* timer;
-Controls* control;
+Skybox skybox;
 
-//XMMATRIX rotation, translation, scale, world_transform;
-//
-//scale = XMMatrixScaling(1, 1, 2);
-//// rotate 45 degrees around X axis, need to convert to Radians
-//rotation = XMMatrixRotationX(XMConvertToRadians(415.0));
-//translation = XMMatrixTranslation(0, 0, 5);
-//
-//world transform = scale * rotation * translation;
-//
-//XMMATRIX view;
-//view = XMMatrixIdentity();
-//
-//XMMATRIX projection;
-//projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(45), 640.0 / 480.0, 1.0, 100.0);
-//
-//XMMATRIX WorldViewProjection = world * view * projection;
+GameTimer timer;
+Controls control;
+
 
 //Define vertex structure
 struct POS_COL_TEX__NORM_VERTEX//This will be added to and renamed in future tutorials
@@ -203,9 +189,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	}
 
-	control = new Controls(g_hInst, g_hWnd);
+	control = Controls(g_hInst, g_hWnd);
 
-	if (FAILED(control->InitialiseInput()))
+	if (FAILED(control.InitialiseInput()))
 	{
 		DXTRACE_MSG("Failed to create Controls");
 		return 0;
@@ -226,8 +212,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Main message loop
 	MSG msg = { 0 };
 
-	timer = new GameTimer();
-	timer->Reset();
+	timer = GameTimer();
+	timer.Reset();
 
 	while (msg.message != WM_QUIT)
 	{
@@ -238,8 +224,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		else
 		{
-			timer->Tick();
-			Update(timer->DeltaTime());
+			timer.Tick();
+			Update(timer.DeltaTime());
 			RenderFrame();			
 		}
 	}
@@ -464,7 +450,7 @@ void ShutdownD3D()
 	if (g_pD3DDevice) g_pD3DDevice->Release();
 
 	if (g_pD3DDevice) g_pD3DDevice->Release();
-	if (camera) delete camera;
+	delete &camera;
 	if (g_p2DText) delete g_p2DText;
 }
 
@@ -618,50 +604,37 @@ HRESULT InitialiseGraphics()
 
 void createWorld()
 {
-	camera = new Camera(1, 1, -0.5f, 0);
+	Camera camera(1, 1, -0.5f, 0);
 
-	player = new Player(100, 25, 0.25f, 1, g_pD3DDevice, g_pImmediateContext);
-	player->LoadObjModel((char*)"Assets/Sphere.obj");
-	player->AddTexture((char*)"Assets/texture.jpg");
-	player->setAmbient_light_colour(g_ambient_light_colour);
-	player->setDirectionalLight(g_directional_light_shines_from, g_directional_light_colour, g_directional_light_rotation);
-	player->setPointLight(g_point_light_colour, g_point_light_position);
-	player->setPosition(0, -3, 5);
+	Player player(100, 25, 0.25f, 1, g_pD3DDevice, g_pImmediateContext);
+	player.LoadObjModel((char*)"Assets/Sphere.obj");
+	player.AddTexture((char*)"Assets/texture.jpg");
+	player.setAmbient_light_colour(g_ambient_light_colour);
+	player.setDirectionalLight(g_directional_light_shines_from, g_directional_light_colour, g_directional_light_rotation);
+	player.setPointLight(g_point_light_colour, g_point_light_position);
+	player.setPosition(0, -3, 5);
 
-	camera->LookAt(player->getPosition().x, player->getPosition().y, player->getPosition().z);
+	camera.LookAt(player.getPosition().x, player.getPosition().y, player.getPosition().z);
 
-	enemy = new Enemy(10, 50, 10, 2, 1, g_pD3DDevice, g_pImmediateContext, player);
-	enemy->LoadObjModel((char*)"Assets/Sphere.obj");
-	enemy->AddTexture((char*)"Assets/texture.jpg");
-	enemy->setPosition(5, 0, 5);
-	enemy->setAmbient_light_colour(g_ambient_light_colour);
-	enemy->setDirectionalLight(g_directional_light_shines_from, g_directional_light_colour, g_directional_light_rotation);
-	enemy->setPointLight(g_point_light_colour, g_point_light_position);
-	enemy->setPatrolPositions(XMVectorSet(0, 0, 0, 0), XMVectorSet(0, 0, 5, 0));
-	enemy->ChangeState(Patrol);
+	Enemy enemy(10.0f, 50.0f, 10.0f, 2.0f, 1.0f, g_pD3DDevice, g_pImmediateContext, &player);
+	enemy.LoadObjModel((char*)"Assets/Sphere.obj");
+	enemy.AddTexture((char*)"Assets/texture.jpg");
+	enemy.setPosition(5, 0, 5);
+	enemy.setAmbient_light_colour(g_ambient_light_colour);
+	enemy.setDirectionalLight(g_directional_light_shines_from, g_directional_light_colour, g_directional_light_rotation);
+	enemy.setPointLight(g_point_light_colour, g_point_light_position);
+	enemy.setPatrolPositions(XMVectorSet(0, 0, 0, 0), XMVectorSet(0, 0, 5, 0));
+	enemy.ChangeState(Patrol);
 
-	if (objects.size() == 0)
-	{
-		objects.reserve(5);
-		for (size_t i = 0; i < 5; i++)
-		{
-			Model* model = new Model(g_pD3DDevice, g_pImmediateContext);
-			model->LoadObjModel((char*)"Assets/cube.obj");
-			model->AddTexture((char*)"Assets/texture.jpg");
-			model->setAmbient_light_colour(g_ambient_light_colour);
-			model->setDirectionalLight(g_directional_light_shines_from, g_directional_light_colour, g_directional_light_rotation);
-			model->setPointLight(g_point_light_colour, g_point_light_position);
-			model->setPosition(i * 3, i * 3, i * 3);
+	Level level(g_pD3DDevice, g_pImmediateContext);
 
-			objects.push_back(*model);
-		}
-	}
+	level.startLevel();
 
-	XMVECTOR cameraPosition = XMVectorSet(camera->GetX(), camera->GetY(), camera->GetZ(), 0);
+	XMVECTOR cameraPosition = XMVectorSet(camera.GetX(), camera.GetY(), camera.GetZ(), 0);
 
-	skybox = new Skybox(g_pD3DDevice, g_pImmediateContext, cameraPosition);
-	skybox->LoadObjModel((char*)"Assets/cube.obj");
-	skybox->AddTexture((char*)"Assets/skybox.dds");
+	Skybox skybox(g_pD3DDevice, g_pImmediateContext, cameraPosition);
+	skybox.LoadObjModel((char*)"Assets/cube.obj");
+	skybox.AddTexture((char*)"Assets/skybox.dds");
 }
 
 // Render frame
@@ -675,7 +648,7 @@ void RenderFrame(void)
 
 	XMMATRIX transpose;
 	XMMATRIX inverse;
-	view = camera->GetViewMatrix();
+	view = camera.GetViewMatrix();
 	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(95.0), 640.0 / 480.0, 1.0, 100.0);
 
 	// Clear the back buffer - choose a colour you like
@@ -687,12 +660,9 @@ void RenderFrame(void)
 	//// Select which primitive type to use //03-01
 	g_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	for (size_t i = 0; i < objects.size(); i++)
-	{
-		objects.at(i).Draw(&view, &projection);
-	}
+	level.drawLevel(&view, &projection);
 
-	enemy->Draw(&view, &projection);
+	enemy.Draw(&view, &projection);
 
 	// RENDER HERE
 
@@ -705,8 +675,8 @@ void RenderFrame(void)
 	directional_light_vector = XMVector3Transform(g_directional_light_shines_from + g_directional_light_rotation, transpose);
 	directional_light_vector = XMVector3Normalize(directional_light_vector);
 
-	skybox->Draw(&view, &projection);
-	player->Draw(&view, &projection);
+	skybox.Draw(&view, &projection);
+	player.Draw(&view, &projection);
 
 	// Display what has just been rendered
 	g_pSwapChain->Present(0, 0);
@@ -716,90 +686,90 @@ void controls()
 {
 	// move forward, distance between old and new position, check collision with distance, if(true) move back
 
-	if (control->IsKeyPressed(DIK_W))
+	if (control.IsKeyPressed(DIK_W))
 	{
-		camera->Forward(0.001);
+		camera.Forward(0.001);
 
-		xyz lookDirection = camera->GetLookDirection();
-		XMVECTOR playerPos = player->getPosition();
+		xyz lookDirection = camera.GetLookDirection();
+		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
-		player->changeDirection(newPosition);
-		player->MoveForward(0.001);
+		player.changeDirection(newPosition);
+		player.MoveForward(0.001);
 	}
-	if (control->IsKeyPressed(DIK_S))
+	if (control.IsKeyPressed(DIK_S))
 	{
-		camera->Forward(-0.001);
+		camera.Forward(-0.001);
 
-		xyz lookDirection = camera->GetLookDirection();
-		XMVECTOR playerPos = player->getPosition();
+		xyz lookDirection = camera.GetLookDirection();
+		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
-		player->changeDirection(newPosition);
-		player->MoveForward(-0.001);
+		player.changeDirection(newPosition);
+		player.MoveForward(-0.001);
 	}
-	if (control->IsKeyPressed(DIK_A))
+	if (control.IsKeyPressed(DIK_A))
 	{
-		camera->Strafe(0.001);
+		camera.Strafe(0.001);
 
-		xyz lookDirection = camera->GetLookDirection();
-		XMVECTOR playerPos = player->getPosition();
+		xyz lookDirection = camera.GetLookDirection();
+		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
-		player->changeDirection(newPosition);
-		player->MoveForward(-0.001);
+		player.changeDirection(newPosition);
+		player.MoveForward(-0.001);
 	}
-	if (control->IsKeyPressed(DIK_D))
+	if (control.IsKeyPressed(DIK_D))
 	{
-		camera->Strafe(-0.001);
+		camera.Strafe(-0.001);
 
-		xyz lookDirection = camera->GetLookDirection();
-		XMVECTOR playerPos = player->getPosition();
+		xyz lookDirection = camera.GetLookDirection();
+		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
-		player->changeDirection(newPosition);
-		player->MoveForward(-0.001);
+		player.changeDirection(newPosition);
+		player.MoveForward(-0.001);
 	}
-	if (control->IsKeyPressed(DIK_Q))
+	if (control.IsKeyPressed(DIK_Q))
 	{
-		camera->Rotate(-0.01);
+		camera.Rotate(-0.01);
 	}
-	if (control->IsKeyPressed(DIK_E))
+	if (control.IsKeyPressed(DIK_E))
 	{
-		camera->Rotate(0.01);
+		camera.Rotate(0.01);
 		
 	}
-	if (control->IsKeyPressed(DIK_X))
+	if (control.IsKeyPressed(DIK_X))
 	{
-		camera->Jump();
+		camera.Jump();
 	}
-	if (control->IsKeyPressed(DIK_SPACE))
+	if (control.IsKeyPressed(DIK_SPACE))
 	{
-		if(player->CharacterInAttackRange(enemy))
-			player->AttackCharacter(enemy);
+		if(player.CharacterInAttackRange(&enemy))
+			player.AttackCharacter(&enemy);
 	}
 }
 
 void Update(float time)
 {
-	control->ReadInputStates();
+	control.ReadInputStates();
 
 	controls();	
 
-	camera->Update();
+	camera.Update();
 
-	enemy->Update();
-	enemy->UpdateTimer();
+	enemy.Update();
+	enemy.UpdateTimer();
 
-	player->UpdateTimer();
+	player.UpdateTimer();
 
-	player->setYPosition(camera->GetY() - 3);
+	player.setYPosition(camera.GetY() - 3);
 
-	if (player->health <= 0)
+	if (player.health <= 0)
 		createWorld();
 
-	if (enemy->health <= 0)
-		delete enemy;
+	if (enemy.health <= 0)
+		delete &enemy;
 
 	//Copy the vertices into the buffer
 	D3D11_MAPPED_SUBRESOURCE ms;
@@ -823,5 +793,5 @@ void CreateMatrices()
 	world *= XMMatrixTranslation(0, 0, 15);
 
 	projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(95.0), 640.0 / 480.0, 1.0, 100.0);
-	view = camera->GetViewMatrix();
+	view = camera.GetViewMatrix();
 }

@@ -16,6 +16,7 @@ struct MODEL_CONSTANT_BUFFERSkybox
 class Skybox 
 {
 	public:
+		Skybox();
 		Skybox(ID3D11Device* device, ID3D11DeviceContext* context, XMVECTOR cameraPosition);
 		HRESULT LoadObjModel(char* filename);
 		void Draw(XMMATRIX* view, XMMATRIX* projection);

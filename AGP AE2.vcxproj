@@ -24,6 +24,7 @@
     <ClCompile Include="Controls.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameTimer.cpp" />
+    <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maths.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -80,6 +81,7 @@
     <ClInclude Include="Controls.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameTimer.h" />
+    <ClInclude Include="Level.h" />
     <ClInclude Include="maths.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="objfilemodel.h" />

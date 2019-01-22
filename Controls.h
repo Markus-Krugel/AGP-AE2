@@ -6,6 +6,7 @@
 class Controls
 {
 	public:
+		Controls();
 		Controls(HINSTANCE hinstance, HWND hWnd);
 		~Controls();
 		HRESULT InitialiseInput();

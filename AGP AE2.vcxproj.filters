@@ -21,6 +21,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="Controls.cpp" />
     <ClCompile Include="maths.cpp" />
+    <ClCompile Include="Level.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h" />
@@ -36,5 +37,6 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="Controls.h" />
     <ClInclude Include="maths.h" />
+    <ClInclude Include="Level.h" />
   </ItemGroup>
 </Project>

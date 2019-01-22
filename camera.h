@@ -15,6 +15,7 @@ class Camera
 		XMVECTOR m_position, m_lookat, m_up;
 
 	public:
+		Camera();
 		Camera(float x, float y, float z, float camera_rotation);
 		void Rotate(float degrees);
 		void Forward(float distance);

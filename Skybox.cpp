@@ -77,6 +77,10 @@ ID3D11SamplerState*			s_Sampler0;
 
 
 
+Skybox::Skybox()
+{
+}
+
 Skybox::Skybox(ID3D11Device *device, ID3D11DeviceContext *context, XMVECTOR cameraPosition)
 {
 	m_pD3DDevice = device;

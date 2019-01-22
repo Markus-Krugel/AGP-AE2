@@ -4,6 +4,7 @@
 
 Model::Model()
 {
+	
 }
 
 Model::Model(ID3D11Device * device, ID3D11DeviceContext * context)
@@ -11,14 +12,15 @@ Model::Model(ID3D11Device * device, ID3D11DeviceContext * context)
 	m_pD3DDevice = device;
 	m_pImmediateContext = context;
 
-
 	m_x = 0;
 	m_y = 0;
 	m_z = 0;
 	m_xAngle = 0;
 	m_yAngle = 0;
 	m_zAngle = 0;
-	m_scale = 1.0f;
+	m_scaleX = 1.0f;
+	m_scaleY = 1.0f;
+	m_scaleZ = 1.0f;
 
 	D3D11_BUFFER_DESC constant_buffer_desc;
 	ZeroMemory(&constant_buffer_desc, sizeof(constant_buffer_desc));
@@ -36,9 +38,9 @@ HRESULT Model::LoadObjModel(char * filename)
 {
 	HRESULT hr = S_OK;
 
-	m_pObject = new ObjFileModel(filename, m_pD3DDevice, m_pImmediateContext);
+	ObjFileModel m_pObject(filename, m_pD3DDevice, m_pImmediateContext);
 
-	if (m_pObject->filename == "FILE NOT LOADED") return S_FALSE;
+	if (m_pObject.filename == "FILE NOT LOADED") return S_FALSE;
 
 	ID3DBlob *VS, *PS, *error;
 	hr = D3DX11CompileFromFile("model_shaders.hlsl", 0, 0, "ModelVS", "vs_4_0", 0, 0, 0, &VS, &error, 0);
@@ -147,7 +149,7 @@ void Model::Draw(XMMATRIX *view, XMMATRIX *projection)
 
 Model::~Model()
 {
-	m_pObject->~ObjFileModel();
+	delete m_pObject;
 
 	if (m_pConstantBuffer) m_pConstantBuffer->Release();
 	if (m_pPShader) m_pPShader->Release();
@@ -155,7 +157,7 @@ Model::~Model()
 	if (m_pInputLayout) m_pInputLayout->Release();
 	
 	if(m_pTexture) m_pTexture->Release();
-	if (m_pSampler) m_pSampler->Release();
+	if (m_pSampler) m_pSampler->Release();	
 }
 
 void Model::AddTexture(char * filename)
@@ -188,29 +190,29 @@ void Model::AddTexture(char * filename)
 
 void Model::CalculateModelCentre()
 {
-	float maxX = m_pObject->vertices[0].Pos.x;
-	float maxY = m_pObject->vertices[0].Pos.y;
-	float maxZ = m_pObject->vertices[0].Pos.z;
+	float maxX = m_pObject->vertices[0].Pos.x * m_scaleX;
+	float maxY = m_pObject->vertices[0].Pos.y * m_scaleY;
+	float maxZ = m_pObject->vertices[0].Pos.z * m_scaleZ;
 
-	float minX = m_pObject->vertices[0].Pos.x;
-	float minY = m_pObject->vertices[0].Pos.y;
-	float minZ = m_pObject->vertices[0].Pos.z;
+	float minX = m_pObject->vertices[0].Pos.x * m_scaleX;
+	float minY = m_pObject->vertices[0].Pos.y * m_scaleY;
+	float minZ = m_pObject->vertices[0].Pos.z * m_scaleZ;
 
 	for (int i = 0; i < m_pObject->numverts; i++)
 	{
-		if (m_pObject->vertices[i].Pos.x > maxX)
-			maxX = m_pObject->vertices[i].Pos.x;
-		if (m_pObject->vertices[i].Pos.y > maxY)
-			maxY = m_pObject->vertices[i].Pos.y;
-		if (m_pObject->vertices[i].Pos.z > maxZ)
-			maxZ = m_pObject->vertices[i].Pos.z;
+		if (m_pObject->vertices[i].Pos.x * m_scaleX > maxX)
+			maxX = m_pObject->vertices[i].Pos.x * m_scaleX;
+		if (m_pObject->vertices[i].Pos.y * m_scaleY > maxY)
+			maxY = m_pObject->vertices[i].Pos.y * m_scaleY;
+		if (m_pObject->vertices[i].Pos.z * m_scaleZ > maxZ)
+			maxZ = m_pObject->vertices[i].Pos.z * m_scaleZ;
 
-		if (m_pObject->vertices[i].Pos.x < minX)
-			minX = m_pObject->vertices[i].Pos.x;
-		if (m_pObject->vertices[i].Pos.y < minY)
-			minY = m_pObject->vertices[i].Pos.y;
-		if (m_pObject->vertices[i].Pos.z < minZ)
-			minZ = m_pObject->vertices[i].Pos.z;
+		if (m_pObject->vertices[i].Pos.x * m_scaleX < minX)
+			minX = m_pObject->vertices[i].Pos.x * m_scaleX;
+		if (m_pObject->vertices[i].Pos.y * m_scaleY < minY)
+			minY = m_pObject->vertices[i].Pos.y * m_scaleY;
+		if (m_pObject->vertices[i].Pos.z * m_scaleZ < minZ)
+			minZ = m_pObject->vertices[i].Pos.z * m_scaleZ;
 	}
 
 	m_bounding_centreX = (maxX - minX) / 2;
@@ -224,7 +226,7 @@ void Model::CalculateBoundingRadius()
 
 	for (int i = 0; i < m_pObject->numverts; i++)
 	{
-		float distanceSquared = pow(m_pObject->vertices[i].Pos.x - m_bounding_centreX, 2) + pow(m_pObject->vertices[i].Pos.y - m_bounding_centreY, 2) + pow(m_pObject->vertices[i].Pos.z - m_bounding_centreZ, 2);
+		float distanceSquared = pow(m_pObject->vertices[i].Pos.x * m_scaleX - m_bounding_centreX, 2) + pow(m_pObject->vertices[i].Pos.y * m_scaleY - m_bounding_centreY, 2) + pow(m_pObject->vertices[i].Pos.z * m_scaleZ - m_bounding_centreZ, 2);
 		if (distanceSquared > maxDist)
 			maxDist = distanceSquared;
 	}
@@ -246,7 +248,7 @@ XMVECTOR Model::GetBoundingSphereWorldSpacePosition()
 
 float Model::GetBoundingSphereRadius()
 {
-	return m_bounding_radius * m_scale;
+	return m_bounding_radius;
 }
 
 boolean Model::CheckCollision(Model* model, xyz* direction)
@@ -320,7 +322,7 @@ boolean Model::CheckCollision(Model* model, xyz* direction)
 
 void Model::calculateWorld()
 {
-	world = XMMatrixScaling(m_scale, m_scale, m_scale);
+	world = XMMatrixScaling(m_scaleX, m_scaleY, m_scaleZ);
 	world *= XMMatrixRotationRollPitchYaw(m_xAngle, m_yAngle, m_zAngle);
 	world *= XMMatrixTranslation(m_x, m_y, m_z);
 }
@@ -425,14 +427,21 @@ XMVECTOR Model::getRotation()
 	return XMVectorSet(m_xAngle, m_yAngle, m_zAngle, 0);
 }
 
-void Model::setScale(float num)
+void Model::setScale(float x, float y, float z)
 {
-	m_scale = num;
+	m_scaleX = x;
+	m_scaleY = y;
+	m_scaleZ = z;
 }
 
-float Model::getScale()
+xyz Model::getScale()
 {
-	return m_scale;
+	xyz scale;
+	scale.x = m_scaleX;
+	scale.y = m_scaleY;
+	scale.z = m_scaleZ;
+
+	return scale;
 }
 #pragma endregion
 
@@ -498,7 +507,9 @@ void Model::incRotation(XMVECTOR rotation)
 
 void Model::incScale(float num)
 {
-	m_scale += num;
+	m_scaleX += num;
+	m_scaleY += num;
+	m_scaleZ += num;
 }
 
 #pragma endregion
