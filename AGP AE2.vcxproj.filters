@@ -9,7 +9,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="objfilemodel.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="text2D.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -22,10 +21,10 @@
     <ClCompile Include="Controls.cpp" />
     <ClCompile Include="maths.cpp" />
     <ClCompile Include="Level.cpp" />
+    <ClCompile Include="objfilemodel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h" />
-    <ClInclude Include="objfilemodel.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="text2D.h" />
     <ClInclude Include="Enemy.h" />
@@ -38,5 +37,6 @@
     <ClInclude Include="Controls.h" />
     <ClInclude Include="maths.h" />
     <ClInclude Include="Level.h" />
+    <ClInclude Include="objfilemodel.h" />
   </ItemGroup>
 </Project>

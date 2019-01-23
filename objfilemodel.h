@@ -12,8 +12,8 @@
 #include <vector>
 using namespace std;
 
+
 struct xyz { float x, y, z; };	//used for vertices and normals during file parse
-struct xy { float x, y; };		//used for texture coordinates during file parse
 
 class ObjFileModel
 {
@@ -46,6 +46,9 @@ private:
 	ID3D11Buffer* pVertexBuffer; 
 
 public:
+
+	
+	struct xy { float x, y; };		//used for texture coordinates during file parse
 
 	// Define model vertex structure
 	struct MODEL_POS_TEX_NORM_VERTEX

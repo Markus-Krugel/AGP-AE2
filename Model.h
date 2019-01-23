@@ -1,8 +1,23 @@
 #pragma once
+#define _XM_NO_INTRINSICS_
+#define XM_NO_ALIGNMENT
+
 #include "objfilemodel.h"
 #include "maths.h"
-#define _XM_NO_INTRINSICS_
-#define _XM_NO_ALIGNMENT
+
+template <size_t align> class AlignedAllocPolicy
+{
+public:
+	void* operator new(std::size_t size)
+	{
+		return _aligned_malloc(size, align);
+	}
+
+	void operator delete(void* mem)
+	{
+		_aligned_free(mem);
+	}
+};
 
 struct MODEL_CONSTANT_BUFFER
 {
@@ -13,7 +28,8 @@ struct MODEL_CONSTANT_BUFFER
 	XMVECTOR point_light_colour;
 	XMVECTOR point_light_position;
 };
-class Model 
+
+_declspec(align(16)) class Model : public AlignedAllocPolicy<16>
 {
 	public:
 		Model();
@@ -21,8 +37,6 @@ class Model
 		HRESULT LoadObjModel(char* filename);
 		void Draw(XMMATRIX* view, XMMATRIX* projection);
 		~Model();
-
-		XMMATRIX world;
 
 		void setXPosition(float num);
 		void setYPosition(float num);
@@ -101,6 +115,8 @@ class Model
 								
 		XMVECTOR				m_point_light_colour;
 		XMVECTOR				m_point_light_position;
+
+		XMMATRIX				world;
 
 		float					m_bounding_centreX;
 		float					m_bounding_centreY;

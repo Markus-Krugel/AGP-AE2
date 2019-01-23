@@ -16,6 +16,7 @@ Enemy::Enemy(float sightRange, float health, float damage, float attackRange, fl
 	//stateMachine = new StateMachine(*this);
 }
 
+// changes the current state of the enemy
 void Enemy::ChangeState(State newState)
 {
 	currentState = newState;
@@ -27,6 +28,7 @@ void Enemy::ChangeState(State newState)
 	switch (currentState)
 	{	
 		case Patrol:
+			// sets current target to the nearest point
 			if (distanceToPatrolPosition1 <= distanceToPatrolPosition2)
 			{
 				changeDirection(patrolPosition1);
@@ -44,13 +46,14 @@ void Enemy::ChangeState(State newState)
 	}
 }
 
+// sets the positions to patrol
 void Enemy::setPatrolPositions(XMVECTOR position1, XMVECTOR position2)
 {
 	patrolPosition1 = position1;
 	patrolPosition2 = position2;
 }
 
-void Enemy::Update()
+void Enemy::Update(float time)
 {
 	float distanceToPatrolPosition1 = pow(getPosition().x - patrolPosition1.x, 2) + pow(getPosition().z - patrolPosition1.z, 2);
 	float distanceToPatrolPosition2 = pow(getPosition().x - patrolPosition2.x, 2) + pow(getPosition().z - patrolPosition2.z, 2);
@@ -58,6 +61,7 @@ void Enemy::Update()
 	switch (currentState)
 	{
 		case Patrol:
+			// if the player is not in sight continue to patrol
 			if (!PlayerInSight())
 			{
 				if (XMVector3Equal(currentTarget, patrolPosition1))
@@ -77,7 +81,7 @@ void Enemy::Update()
 						changeDirection(patrolPosition1);
 					}
 				}
-				MoveForward(0.00025f);
+				MoveForward(time * 0.5f);
 			}
 			else
 			{
@@ -87,12 +91,14 @@ void Enemy::Update()
 		case Chase:
 			if (PlayerInSight())
 			{
+				// if he is nearby the player he will attack otherwise he will move towards the player
 				AttackCharacter(player);
 				
 				if (!CharacterInAttackRange(player))
 				{
 					changeDirection(player->getPosition());
-					MoveForward(0.00025f);
+					// moves the enemy slower than the player so that the player can escape
+					MoveForward(time * 0.25f);
 				}
 			}
 			else
@@ -103,6 +109,7 @@ void Enemy::Update()
 	}
 }
 
+// checks if the player is in sight range
 boolean Enemy::PlayerInSight()
 {
 	float distanceToPlayer = pow(getPosition().x - player->getPosition().x, 2) + pow(getPosition().z - player->getPosition().z, 2);

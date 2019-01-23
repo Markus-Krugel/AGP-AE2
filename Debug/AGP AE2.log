@@ -1,5 +1,4 @@
-﻿  camera.cpp
-h:\southampton\agp ae2 folder\agp-ae2\camera.cpp(1): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+﻿  Model.cpp
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2662): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2663): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2664): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
@@ -28,16 +27,8 @@ c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2732)
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2742): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2743): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
 c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamath.h(2754): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.inl(2254): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.inl(4523): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.inl(4577): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.inl(4639): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.inl(4707): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.inl(4770): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathconvert.inl(4832): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathvector.inl(1269): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathmisc.inl(518): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-c:\program files (x86)\microsoft directx sdk (june 2010)\include\xnamathmisc.inl(519): warning C4838: conversion from 'unsigned int' to 'INT' requires a narrowing conversion
-h:\southampton\agp ae2 folder\agp-ae2\camera.cpp(122): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-h:\southampton\agp ae2 folder\agp-ae2\camera.cpp(137): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-  AGP AE2.vcxproj -> H:\Southampton\AGP AE2 Folder\AGP-AE2\Debug\AGP AE2.exe
+e:\southampton\agp ae2 folder\agp-ae2\model.cpp(212): warning C4018: '<': signed/unsigned mismatch
+e:\southampton\agp ae2 folder\agp-ae2\model.cpp(238): warning C4018: '<': signed/unsigned mismatch
+e:\southampton\agp ae2 folder\agp-ae2\model.cpp(282): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+e:\southampton\agp ae2 folder\agp-ae2\model.cpp(332): warning C4715: 'Model::CheckCollision': not all control paths return a value
+  AGP AE2.vcxproj -> E:\Southampton\AGP AE2 Folder\AGP-AE2\Debug\AGP AE2.exe

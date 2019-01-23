@@ -20,7 +20,7 @@ class Enemy : public Character
 		XMVECTOR currentTarget;
 		void ChangeState(State state);
 		void setPatrolPositions(XMVECTOR position1, XMVECTOR position2);
-		void Update();		
+		void Update(float time);		
 		boolean PlayerInSight();
 
 	protected:

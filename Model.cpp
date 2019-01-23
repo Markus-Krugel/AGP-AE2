@@ -1,10 +1,13 @@
 #include "Model.h"
-#define _XM_NO_INTRINSICS_
-#define _XM_NO_ALIGNMENT
 
 Model::Model()
 {
-	
+	m_pObject = NULL;
+	m_pPShader = NULL;
+	m_pVShader = NULL;
+	m_pInputLayout = NULL;
+	m_pTexture = NULL;
+	m_pSampler = NULL;
 }
 
 Model::Model(ID3D11Device * device, ID3D11DeviceContext * context)
@@ -22,6 +25,13 @@ Model::Model(ID3D11Device * device, ID3D11DeviceContext * context)
 	m_scaleY = 1.0f;
 	m_scaleZ = 1.0f;
 
+	m_pObject = NULL;
+	m_pPShader = NULL;
+	m_pVShader = NULL;
+	m_pInputLayout = NULL;
+	m_pTexture = NULL;
+	m_pSampler = NULL;
+
 	D3D11_BUFFER_DESC constant_buffer_desc;
 	ZeroMemory(&constant_buffer_desc, sizeof(constant_buffer_desc));
 
@@ -38,9 +48,9 @@ HRESULT Model::LoadObjModel(char * filename)
 {
 	HRESULT hr = S_OK;
 
-	ObjFileModel m_pObject(filename, m_pD3DDevice, m_pImmediateContext);
+	m_pObject = new ObjFileModel(filename, m_pD3DDevice, m_pImmediateContext);
 
-	if (m_pObject.filename == "FILE NOT LOADED") return S_FALSE;
+	if (m_pObject->filename == "FILE NOT LOADED") return S_FALSE;
 
 	ID3DBlob *VS, *PS, *error;
 	hr = D3DX11CompileFromFile("model_shaders.hlsl", 0, 0, "ModelVS", "vs_4_0", 0, 0, 0, &VS, &error, 0);
@@ -84,9 +94,10 @@ HRESULT Model::LoadObjModel(char * filename)
 	D3D11_INPUT_ELEMENT_DESC iedesc[] =
 	{
 		//Be very careful setting the correct dxgi format and D3D version
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
 		//NOTE the spelling of COLOR. Again, be careful setting the correct dxgi format (using A32) and correct D3D version
-		{"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"NORMAL",0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
@@ -121,8 +132,7 @@ void Model::Draw(XMMATRIX *view, XMMATRIX *projection)
 	model_cb_values.directional_light_vector = XMVector3Normalize(model_cb_values.directional_light_vector);
 
 	XMVECTOR determinant;
-	XMMATRIX inverse;
-	inverse = XMMatrixInverse(&determinant, world);
+	XMMATRIX inverse = XMMatrixInverse(&determinant, world);
 
 	m_point_light_position = XMVector3Transform(m_point_light_position, inverse);
 
@@ -138,6 +148,7 @@ void Model::Draw(XMMATRIX *view, XMMATRIX *projection)
 
 	// Anisotropic filtering enabling
 	sampler_desc.Filter = D3D11_FILTER_ANISOTROPIC;
+	// maximal anisotropy level
 	sampler_desc.MaxAnisotropy = 16;
 	m_pD3DDevice->CreateSamplerState(&sampler_desc, &m_pSampler);
 
@@ -322,7 +333,7 @@ boolean Model::CheckCollision(Model* model, xyz* direction)
 
 void Model::calculateWorld()
 {
-	world = XMMatrixScaling(m_scaleX, m_scaleY, m_scaleZ);
+	XMMATRIX world = XMMatrixScaling(m_scaleX, m_scaleY, m_scaleZ);
 	world *= XMMatrixRotationRollPitchYaw(m_xAngle, m_yAngle, m_zAngle);
 	world *= XMMatrixTranslation(m_x, m_y, m_z);
 }

@@ -1,13 +1,16 @@
+
 //The #include order is important
+
+
+#define _XM_NO_INTRINSICS_
+#define _XM_NO_ALIGNMENT
+
 #include <d3d11.h>
 #include <dxgi.h>
 #include <d3dx11.h>
 #include <windows.h>
 #include <dxerr.h>
 #include <time.h>
-
-#define _XM_NO_INTRINSICS_
-#define _XM_NO_ALIGNMENT
 
 #include "camera.h"
 #include <xnamath.h>
@@ -39,7 +42,7 @@ bool colorChosen = false;
 float rgba_clear_colour[4] = {};
 
 // Rename for each tutorial – This will appear in the title bar of the window
-char		g_TutorialName[100] = "Tutorial 01 Exercise 01\0";
+char		g_TutorialName[100] = "AGP AE2";
 
 ID3D11Buffer*		g_pVertexBuffer;
 ID3D11VertexShader*	g_pVertexShader;
@@ -74,7 +77,7 @@ Level level;
 Player player;
 Enemy enemy;
 
-Skybox skybox;
+//Skybox skybox;
 
 GameTimer timer;
 Controls control;
@@ -189,14 +192,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		return 0;
 	}
 
-	control = Controls(g_hInst, g_hWnd);
-
-	if (FAILED(control.InitialiseInput()))
-	{
-		DXTRACE_MSG("Failed to create Controls");
-		return 0;
-	}
-
 	if (FAILED(InitialiseD3D()))
 	{
 		DXTRACE_MSG("Failed to create Device");
@@ -206,6 +201,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (FAILED(InitialiseGraphics()))
 	{
 		DXTRACE_MSG("Failed to initialise graphics");
+		return 0;
+	}
+
+	control = Controls(g_hInst, g_hWnd);
+
+	if (FAILED(control.InitialiseInput()))
+	{
+		DXTRACE_MSG("Failed to create Controls");
 		return 0;
 	}
 
@@ -604,9 +607,9 @@ HRESULT InitialiseGraphics()
 
 void createWorld()
 {
-	Camera camera(1, 1, -0.5f, 0);
+	camera = Camera(1, 1, -0.5f, 0);
 
-	Player player(100, 25, 0.25f, 1, g_pD3DDevice, g_pImmediateContext);
+	player = Player(100, 25, 0.25f, 1, g_pD3DDevice, g_pImmediateContext);
 	player.LoadObjModel((char*)"Assets/Sphere.obj");
 	player.AddTexture((char*)"Assets/texture.jpg");
 	player.setAmbient_light_colour(g_ambient_light_colour);
@@ -616,7 +619,7 @@ void createWorld()
 
 	camera.LookAt(player.getPosition().x, player.getPosition().y, player.getPosition().z);
 
-	Enemy enemy(10.0f, 50.0f, 10.0f, 2.0f, 1.0f, g_pD3DDevice, g_pImmediateContext, &player);
+	enemy = Enemy(10.0f, 50.0f, 10.0f, 2.0f, 1.0f, g_pD3DDevice, g_pImmediateContext, &player);
 	enemy.LoadObjModel((char*)"Assets/Sphere.obj");
 	enemy.AddTexture((char*)"Assets/texture.jpg");
 	enemy.setPosition(5, 0, 5);
@@ -626,15 +629,15 @@ void createWorld()
 	enemy.setPatrolPositions(XMVectorSet(0, 0, 0, 0), XMVectorSet(0, 0, 5, 0));
 	enemy.ChangeState(Patrol);
 
-	Level level(g_pD3DDevice, g_pImmediateContext);
+	level = Level(g_pD3DDevice, g_pImmediateContext);
 
 	level.startLevel();
 
 	XMVECTOR cameraPosition = XMVectorSet(camera.GetX(), camera.GetY(), camera.GetZ(), 0);
 
-	Skybox skybox(g_pD3DDevice, g_pImmediateContext, cameraPosition);
-	skybox.LoadObjModel((char*)"Assets/cube.obj");
-	skybox.AddTexture((char*)"Assets/skybox.dds");
+	//skybox = Skybox(g_pD3DDevice, g_pImmediateContext, cameraPosition);
+	//skybox.LoadObjModel((char*)"Assets/cube.obj");
+	//skybox.AddTexture((char*)"Assets/skybox.dds");
 }
 
 // Render frame
@@ -666,7 +669,7 @@ void RenderFrame(void)
 
 	// RENDER HERE
 
-	g_p2DText->AddText("Text", -1, 1, 0.2f);
+	g_p2DText->AddText("Health: "+to_string(player.health), -1, 1, 0.2f);
 	
 	g_p2DText->RenderText();
 
@@ -675,68 +678,68 @@ void RenderFrame(void)
 	directional_light_vector = XMVector3Transform(g_directional_light_shines_from + g_directional_light_rotation, transpose);
 	directional_light_vector = XMVector3Normalize(directional_light_vector);
 
-	skybox.Draw(&view, &projection);
+	//skybox.Draw(&view, &projection);
 	player.Draw(&view, &projection);
 
 	// Display what has just been rendered
 	g_pSwapChain->Present(0, 0);
 }
 
-void controls()
+void controls(float time)
 {
 	// move forward, distance between old and new position, check collision with distance, if(true) move back
 
 	if (control.IsKeyPressed(DIK_W))
 	{
-		camera.Forward(0.001);
+		camera.Forward(time);
 
 		xyz lookDirection = camera.GetLookDirection();
 		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
 		player.changeDirection(newPosition);
-		player.MoveForward(0.001);
+		player.MoveForward(time);
 	}
 	if (control.IsKeyPressed(DIK_S))
 	{
-		camera.Forward(-0.001);
+		camera.Forward(-time);
 
 		xyz lookDirection = camera.GetLookDirection();
 		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
 		player.changeDirection(newPosition);
-		player.MoveForward(-0.001);
+		player.MoveForward(-time);
 	}
 	if (control.IsKeyPressed(DIK_A))
 	{
-		camera.Strafe(0.001);
+		camera.Strafe(time);
 
 		xyz lookDirection = camera.GetLookDirection();
 		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
 		player.changeDirection(newPosition);
-		player.MoveForward(-0.001);
+		player.MoveForward(-time);
 	}
 	if (control.IsKeyPressed(DIK_D))
 	{
-		camera.Strafe(-0.001);
+		camera.Strafe(-time);
 
 		xyz lookDirection = camera.GetLookDirection();
 		XMVECTOR playerPos = player.getPosition();
 		XMVECTOR newPosition = XMVectorSet(lookDirection.x + playerPos.x, lookDirection.y + playerPos.y, lookDirection.z + playerPos.z, 0);
 
 		player.changeDirection(newPosition);
-		player.MoveForward(-0.001);
+		player.MoveForward(-time);
 	}
 	if (control.IsKeyPressed(DIK_Q))
 	{
-		camera.Rotate(-0.01);
+		camera.Rotate(-time);
 	}
 	if (control.IsKeyPressed(DIK_E))
 	{
-		camera.Rotate(0.01);
+		camera.Rotate(time);
 		
 	}
 	if (control.IsKeyPressed(DIK_X))
@@ -750,15 +753,16 @@ void controls()
 	}
 }
 
+// updates the scene 
 void Update(float time)
 {
 	control.ReadInputStates();
 
-	controls();	
+	controls(time);	
 
 	camera.Update();
 
-	enemy.Update();
+	enemy.Update(time);
 	enemy.UpdateTimer();
 
 	player.UpdateTimer();
@@ -784,7 +788,7 @@ void Update(float time)
 	g_pImmediateContext->Unmap(g_pVertexBuffer, NULL);
 }
 
-
+// creates the matrices for the WVP Matrix
 void CreateMatrices()
 {
 	world = XMMatrixTranslation(0, 1, 2);

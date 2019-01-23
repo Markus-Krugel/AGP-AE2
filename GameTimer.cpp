@@ -17,6 +17,7 @@ GameTimer::GameTimer()
 	mStopped = false;
 }
 
+// returns the total time
 float GameTimer::GameTime() const
 {
 	if (mStopped)
@@ -25,11 +26,13 @@ float GameTimer::GameTime() const
 		return (float)(((mCurrentTime - mPausedTime) - mBaseTime) *mSecondsPerCount);
 }
 
+// returns the time since the last tick
 float GameTimer::DeltaTime() const
 {
 	return(float)mDeltaTime;
 }
 
+// resets the values of the timer
 void GameTimer::Reset()
 {
 	__int64 currTime;
@@ -41,6 +44,7 @@ void GameTimer::Reset()
 	mStopped = false;
 }
 
+// start to record the time
 void GameTimer::Start()
 {
 	__int64 startTime;
@@ -54,6 +58,7 @@ void GameTimer::Start()
 	}
 }
 
+// stops the timer
 void GameTimer::Stop()
 {
 	if (!mStopped)
@@ -63,6 +68,7 @@ void GameTimer::Stop()
 	}
 }
 
+// collects the time since the last tick 
 void GameTimer::Tick()
 {
 	if (mStopped)

@@ -79,6 +79,13 @@ ID3D11SamplerState*			s_Sampler0;
 
 Skybox::Skybox()
 {
+	m_pObject = NULL;
+	m_pConstantBuffer = NULL;
+	m_pPShader = NULL;
+	m_pVShader = NULL;
+	m_pInputLayout = NULL;
+	m_pTexture = NULL;
+	m_pSampler = NULL;
 }
 
 Skybox::Skybox(ID3D11Device *device, ID3D11DeviceContext *context, XMVECTOR cameraPosition)
@@ -95,6 +102,14 @@ Skybox::Skybox(ID3D11Device *device, ID3D11DeviceContext *context, XMVECTOR came
 	m_x = 0;
 	m_y = 0;
 	m_z = 10.0f;
+
+	m_pObject = NULL;
+	m_pConstantBuffer = NULL;
+	m_pPShader = NULL;
+	m_pVShader = NULL;
+	m_pInputLayout = NULL;
+	m_pTexture = NULL;
+	m_pSampler = NULL;
 
 	D3D11_BUFFER_DESC constant_buffer_desc;
 	ZeroMemory(&constant_buffer_desc, sizeof(constant_buffer_desc));
