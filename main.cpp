@@ -65,6 +65,9 @@ XMVECTOR g_point_light_position;
 Model* sphere;
 Model* sphere2;
 
+Model* ground;
+int groundScale = 50;
+
 //XMMATRIX rotation, translation, scale, world_transform;
 //
 //scale = XMMatrixScaling(1, 1, 2);
@@ -672,6 +675,12 @@ HRESULT InitialiseGraphics()
 	sphere2->AddTexture((char*)"Assets/texture.jpg");
 	sphere2->setPosition(10, 0, 10);
 
+	ground = new Model(g_pD3DDevice, g_pImmediateContext);
+	ground->LoadObjModel((char*)"Assets/cube.obj");
+	ground->AddTexture((char*)"Assets/texture.jpg");
+	ground->setScale(groundScale);
+	ground->setPosition(0, -groundScale * 1.05f, 0);
+
 	return S_OK;
 	
 }
@@ -776,9 +785,11 @@ void RenderFrame(void)
 	sphere->Draw(&view, &projection);
 	sphere2->Draw(&view, &projection);
 
+	ground->Draw(&view, &projection);
+
 	// RENDER HERE
 
-	g_p2DText->AddText("Text", -1, 1, 0.2f);
+	g_p2DText->AddText(std::to_string(42), -1, 1, 0.2f);
 
 	g_p2DText->RenderText();
 
@@ -846,19 +857,19 @@ void Update()
 
 	if (GetKeyState('W') & 0x8000)
 	{
-		camera->Forward(0.001);
+		camera->Forward(0.005);
 	}
 	if (GetKeyState('S') & 0x8000)
 	{
-		camera->Forward(-0.001);
+		camera->Forward(-0.005);
 	}
 	if (GetKeyState('A') & 0x8000)
 	{
-		camera->Strafe(0.001);
+		camera->Strafe(0.005);
 	}
 	if (GetKeyState('D') & 0x8000)
 	{
-		camera->Strafe(-0.001);
+		camera->Strafe(-0.005);
 	}
 	if (GetKeyState('Q') & 0x8000)
 	{
