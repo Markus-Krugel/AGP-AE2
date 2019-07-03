@@ -1,7 +1,7 @@
 struct VOut
 {
 	float4 position : SV_POSITION;
-	float4 color	: COLOR;
+	float4 color	: COLOR;//Note the spelling of this and all instances below
 	float2 texcoord : TEXCOORD;
 };
 
@@ -11,10 +11,11 @@ cbuffer CBuffer0
 	float4 directional_light_vector;
 	float4 directional_light_colour;
 	float4 ambient_light_colour;
+	float red_fraction;
 	float scale;
 	float4 g_point_light_colour;
 	float4 g_point_light_position;
-	float3 packing;
+	float2 packing;
 };
 
 Texture2D texture0;
@@ -24,10 +25,15 @@ VOut VShader(float4 position : POSITION, float4 color : COLOR, float2 texcoord :
 {
 	VOut output;
 
+	color.r *= red_fraction;
+
 	output.position = mul(WVPMatrix, position);
 	if (scale != 0)
 	{
-		output.position *= scale;
+		/*output.position.x *= scale;
+		output.position.y *= (1 - scale);*/
+		
+		//output.position.xy *= scale;
 	}
 
 	float4 lightvector = g_point_light_position - position;
@@ -38,6 +44,8 @@ VOut VShader(float4 position : POSITION, float4 color : COLOR, float2 texcoord :
 	float diffuse_amount = dot(directional_light_vector, normal);
 	diffuse_amount = saturate(diffuse_amount);
 	output.color = color + ambient_light_colour + (directional_light_colour * diffuse_amount) + (g_point_light_colour * point_amount);
+
+	//output.color = color;
 
 	output.texcoord = texcoord;
 
