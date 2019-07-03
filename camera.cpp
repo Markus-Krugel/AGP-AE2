@@ -89,3 +89,18 @@ void Camera::Pitch(float degree)
 		m_dy = sin(m_pitchDegree * (XM_PI / 180));
 	}
 }
+
+float Camera::GetX()
+{
+	return m_x;
+}
+
+float Camera::GetY()
+{
+	return m_y;
+}
+
+float Camera::GetZ()
+{
+	return m_z;
+}

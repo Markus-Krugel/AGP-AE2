@@ -91,6 +91,9 @@ HRESULT Model::LoadObjModel(char * filename)
 
 	m_pImmediateContext->IASetInputLayout(m_pInputLayout);
 
+	CalculateModelCentre();
+	CalculateBoundingRadius();
+
 	return S_OK;
 }
 
@@ -141,6 +144,112 @@ void Model::AddTexture(char * filename)
 	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+}
+
+void Model::CalculateModelCentre()
+{
+	float maxX = m_pObject->vertices[0].Pos.x * m_scale;
+	float maxY = m_pObject->vertices[0].Pos.y * m_scale;
+	float maxZ = m_pObject->vertices[0].Pos.z * m_scale;
+
+	float minX = m_pObject->vertices[0].Pos.x * m_scale;
+	float minY = m_pObject->vertices[0].Pos.y * m_scale;
+	float minZ = m_pObject->vertices[0].Pos.z * m_scale;
+
+	for (int i = 0; i < m_pObject->numverts; i++)
+	{
+		if (m_pObject->vertices[i].Pos.x * m_scale > maxX)
+			maxX = m_pObject->vertices[i].Pos.x * m_scale;
+		if (m_pObject->vertices[i].Pos.y * m_scale > maxY)
+			maxY = m_pObject->vertices[i].Pos.y * m_scale;
+		if (m_pObject->vertices[i].Pos.z * m_scale > maxZ)
+			maxZ = m_pObject->vertices[i].Pos.z * m_scale;
+
+		if (m_pObject->vertices[i].Pos.x * m_scale < minX)
+			minX = m_pObject->vertices[i].Pos.x * m_scale;
+		if (m_pObject->vertices[i].Pos.y * m_scale < minY)
+			minY = m_pObject->vertices[i].Pos.y * m_scale;
+		if (m_pObject->vertices[i].Pos.z * m_scale < minZ)
+			minZ = m_pObject->vertices[i].Pos.z * m_scale;
+	}
+
+	m_bounding_centreX = (maxX + minX) / 2;
+	m_bounding_centreY = (maxY + minY) / 2;
+	m_bounding_centreZ = (maxZ + minZ) / 2;
+}
+
+void Model::CalculateBoundingRadius()
+{
+	float maxDist = 0;
+
+	for (int i = 0; i < m_pObject->numverts; i++)
+	{
+		float distanceSquared = sqrt(pow(m_pObject->vertices[i].Pos.x * m_scale - m_bounding_centreX, 2) + pow(m_pObject->vertices[i].Pos.y * m_scale - m_bounding_centreY, 2) + pow(m_pObject->vertices[i].Pos.z * m_scale - m_bounding_centreZ, 2));
+		if (distanceSquared > maxDist)
+			maxDist = distanceSquared;
+	}
+
+	m_bounding_radius = maxDist;
+}
+
+XMVECTOR Model::GetBoundingSphereWorldSpacePosition()
+{
+	XMMATRIX world;
+	world = XMMatrixScaling(m_scale, m_scale, m_scale);
+	world *= XMMatrixRotationRollPitchYaw(m_xAngle, m_yAngle, m_zAngle);
+	world *= XMMatrixTranslation(m_x, m_y, m_z);
+
+	XMVECTOR offset;
+
+	offset = XMVectorSet(m_bounding_centreX, m_bounding_centreY, m_bounding_centreZ, 0.0);
+	offset = XMVector3Transform(offset, world);
+
+	return offset;
+}
+
+float Model::GetBoundingSphereRadius()
+{
+	return m_bounding_radius * m_scale;
+}
+
+boolean Model::CheckCollision(Model* model)
+{
+	if (model == this)
+		return false;
+	else
+	{
+		XMVECTOR thisBounding = GetBoundingSphereWorldSpacePosition();
+		XMVECTOR otherBounding = model->GetBoundingSphereWorldSpacePosition();
+
+		double xThis = XMVectorGetX(thisBounding);
+		double yThis = XMVectorGetY(thisBounding);
+		double zThis = XMVectorGetZ(thisBounding);
+
+		double xOther = XMVectorGetX(otherBounding);
+		double yOther = XMVectorGetY(otherBounding);
+		double zOther = XMVectorGetZ(otherBounding);
+
+		float distanceSquared = pow(xThis - xOther, 2) + pow(yThis - yOther, 2) + pow(zThis - zOther, 2);
+
+		if (distanceSquared < pow(GetBoundingSphereRadius() + model->GetBoundingSphereRadius(), 2))
+			return true;
+		else
+			return false;
+	}
+}
+
+void Model::LookAt(float x, float z)
+{
+	float dx = m_x - x;
+	float dz = m_z - z;
+
+	m_yAngle = atan2(dx, dz) * (180.0 / XM_PI);
+}
+
+void Model::MoveForward(float distance)
+{
+	m_x += sin(m_yAngle * (XM_PI / 180.0)) * distance;
+	m_z += cos(m_yAngle * (XM_PI / 180.0)) * distance;
 }
 
 #pragma region get and set Methods

@@ -24,5 +24,7 @@ class Camera
 		void Jump();
 		void Update();
 		void Pitch(float degree);
-		
+		float GetX();
+		float GetY();
+		float GetZ();
 };

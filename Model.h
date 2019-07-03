@@ -47,6 +47,11 @@ class Model
 		
 		void AddTexture(char* filename);
 
+		float GetBoundingSphereRadius();
+		boolean CheckCollision(Model* model);
+		void LookAt(float x, float z);
+		void MoveForward(float distance);
+
 	private:
 		ID3D11Device*			m_pD3DDevice;
 		ID3D11DeviceContext*	m_pImmediateContext;
@@ -64,4 +69,15 @@ class Model
 
 		ID3D11ShaderResourceView*	m_pTexture;
 		ID3D11SamplerState*			m_pSampler;
+
+		float					m_bounding_centreX;
+		float					m_bounding_centreY;
+		float					m_bounding_centreZ;
+		float					m_bounding_radius;
+
+		void					CalculateModelCentre();
+
+		void CalculateBoundingRadius();
+
+		XMVECTOR GetBoundingSphereWorldSpacePosition();
 };

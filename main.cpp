@@ -63,6 +63,7 @@ XMVECTOR g_point_light_colour;
 XMVECTOR g_point_light_position;
 
 Model* sphere;
+Model* sphere2;
 
 //XMMATRIX rotation, translation, scale, world_transform;
 //
@@ -666,6 +667,11 @@ HRESULT InitialiseGraphics()
 	sphere->LoadObjModel((char*)"Assets/Sphere.obj");
 	sphere->AddTexture((char*)"Assets/texture.jpg");
 
+	sphere2 = new Model(g_pD3DDevice, g_pImmediateContext);
+	sphere2->LoadObjModel((char*)"Assets/Sphere.obj");
+	sphere2->AddTexture((char*)"Assets/texture.jpg");
+	sphere2->setPosition(10, 0, 10);
+
 	return S_OK;
 	
 }
@@ -768,6 +774,7 @@ void RenderFrame(void)
 	//g_pImmediateContext->Draw(36, 0);
 
 	sphere->Draw(&view, &projection);
+	sphere2->Draw(&view, &projection);
 
 	// RENDER HERE
 
@@ -911,6 +918,16 @@ void Update()
 	}
 
 	camera->Update();
+
+	sphere->LookAt(sphere2->getPosition().x, sphere2->getPosition().z);
+	sphere->MoveForward(-0.003f);
+	if(sphere->CheckCollision(sphere2))
+		sphere->MoveForward(0.003f);
+
+	sphere2->LookAt(sphere->getPosition().x, sphere->getPosition().z);
+	sphere2->MoveForward(-0.003f);
+	if (sphere2->CheckCollision(sphere))
+		sphere2->MoveForward(0.003f);
 
 	//world2 *= XMMatrixTranslation(0, 0, 0.01);
 
